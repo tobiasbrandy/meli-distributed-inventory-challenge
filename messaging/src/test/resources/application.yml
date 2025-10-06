@@ -1,0 +1,4 @@
+logging:
+  level:
+    com.tobiasbrandy.meli.inventory.messaging.OutboxEventPublisher: OFF
+    com.tobiasbrandy.meli.inventory.messaging.EventListener: WARN

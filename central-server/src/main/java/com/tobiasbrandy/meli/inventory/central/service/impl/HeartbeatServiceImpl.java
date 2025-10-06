@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class HeartbeatServiceImpl implements HeartbeatService {
-    private static final long HEARTBEAT_TIMEOUT_MS = 70_000;
+    private static final long HEARTBEAT_TIMEOUT_MS = 50_000;
 
     private final StringRedisTemplate redis;
 

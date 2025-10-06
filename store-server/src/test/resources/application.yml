@@ -1,0 +1,3 @@
+logging:
+  level:
+    com.tobiasbrandy.meli.inventory.store.service.impl.InventoryServiceImpl: OFF
