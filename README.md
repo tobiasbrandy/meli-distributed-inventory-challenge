@@ -176,6 +176,7 @@ Central rejects remote purchases for offline stores, but stores can still apply 
 - Configure OpenTelemetry or a similar service to capture metrics and traces.
 
 ## AI Usage
+
 Both Cursor and Claude Code were used to evaluate designs and implement them.
 Also, cursor's tab model is the best right now.
 
