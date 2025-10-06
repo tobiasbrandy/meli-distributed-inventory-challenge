@@ -18,7 +18,6 @@ import java.util.List;
 @ConfigurationPropertiesScan(basePackages = "com.tobiasbrandy.meli.inventory")
 @EnableScheduling
 public class CentralServer {
-    @SuppressWarnings("UnnecessaryModifier")
     public static void main(final String[] args) {
         SpringApplication.run(CentralServer.class, args);
     }

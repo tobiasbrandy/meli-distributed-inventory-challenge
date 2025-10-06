@@ -7,6 +7,12 @@ import lombok.val;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * Reads store heartbeat timestamps from Redis to determine availability.
+ * <p>
+ * A store is considered alive if its last heartbeat is within
+ * HEARTBEAT_TIMEOUT_MS.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

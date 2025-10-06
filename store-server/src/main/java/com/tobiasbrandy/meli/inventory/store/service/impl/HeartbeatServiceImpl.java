@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Emits periodic heartbeat timestamps to Redis to signal store availability.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,7 +24,9 @@ public class HeartbeatServiceImpl implements HeartbeatService {
 
     @Scheduled(fixedRate = 30_000)
     public void scheduledHeartbeat() {
-        if (disconnected.get()) return;
+        if (disconnected.get()) {
+            return;
+        }
         emitHeartbeat();
     }
 

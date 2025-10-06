@@ -20,6 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Outbox-based event publisher.
+ * <p>
+ * Stores events in the database, then a scheduled job publishes them to Redis Streams.
+ * This ensures eventual consistency, and avoids dropping messages upon a connectivity problem.
+ * Payload types are enforced to match {@link EventType} definitions.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -49,13 +56,19 @@ public class OutboxEventPublisher implements EventPublisher {
         return event;
     }
 
+    /**
+     * Periodically publishes unpublished outbox events to Redis Streams and marks
+     * them as published.
+     */
     @Scheduled(fixedDelay = 200)
     @Transactional
     protected void publish() {
         val events = outboxEventRepository.findByPublishedFalseOrderByIdAsc(PageRequest.ofSize(10));
         final List<Long> publishedEventIds = new ArrayList<>(events.size());
 
-        if (disconnected.get()) return;
+        if (disconnected.get()) {
+            return;
+        }
 
         try {
             for (val event : events) {

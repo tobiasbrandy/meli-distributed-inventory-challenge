@@ -17,10 +17,16 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Wires Redis Stream consumption with a single-consumer-per-group setup.
+ * <p>
+ * Creates consumer groups if absent and subscribes the {@link EventListener} to
+ * the configured streams.
+ */
 @Configuration
 class MessagingConfig {
 
-    @Bean(initMethod="start", destroyMethod="stop")
+    @Bean(initMethod = "start", destroyMethod = "stop")
     StreamMessageListenerContainer<String, MapRecord<String, String, String>> container(final RedisConnectionFactory cf) {
         return StreamMessageListenerContainer.create(cf, StreamMessageListenerContainer.StreamMessageListenerContainerOptions
             .builder()
@@ -42,8 +48,7 @@ class MessagingConfig {
         for (val stream : consumerStreams) {
             try {
                 redis.opsForStream().createGroup(stream, ReadOffset.from("0"), consumerGroup);
-            }
-            catch (final Exception e) {
+            } catch (final Exception e) {
                 // Group already exists
             }
 

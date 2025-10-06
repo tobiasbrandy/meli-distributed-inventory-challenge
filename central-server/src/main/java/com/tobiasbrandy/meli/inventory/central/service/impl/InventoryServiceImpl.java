@@ -22,6 +22,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Central inventory service implementation.
+ * <p>
+ * Responsibilities:
+ * <ul>
+ * <li>CRUD operations on central inventory</li>
+ * <li>Remote purchase processing with heartbeat-based availability checks</li>
+ * <li>Emission of domain events via {@link EventPublisher}</li>
+ * </ul>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

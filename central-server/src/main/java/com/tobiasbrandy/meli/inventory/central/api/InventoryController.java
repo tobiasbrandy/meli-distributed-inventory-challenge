@@ -13,6 +13,17 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST API for central inventory operations.
+ * <p>
+ * Endpoints:
+ * <ul>
+ * <li>GET / — health check</li>
+ * <li>GET /inventory — paginated list (defaults: page=0, size=20; maxsize=1000)</li>
+ * <li>GET /inventory/{storeId}/{productId} — fetch item</li>
+ * <li>POST /purchase/{storeId}/{productId} — process a remote purchase</li>
+ * </ul>
+ */
 @RestController
 @RequiredArgsConstructor
 public class InventoryController {

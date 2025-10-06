@@ -16,6 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Redis Stream listener that delegates events to all {@link EventHandler} beans.
+ * <p>
+ * Ensures idempotency via Redis SETNX on the event id, validates event type and
+ * payload.
+ */
 @Slf4j
 @Component
 public class EventListener implements StreamListener<String, MapRecord<String, String, String>> {
@@ -51,9 +57,9 @@ public class EventListener implements StreamListener<String, MapRecord<String, S
         }
 
         final EventType type;
-        try{
+        try {
             type = EventType.valueOf(eventMap.get("type"));
-        } catch(final IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid event type");
         }
 
@@ -72,10 +78,10 @@ public class EventListener implements StreamListener<String, MapRecord<String, S
             throw new IllegalArgumentException("Failed to serialize event payload", e);
         }
 
-        @SuppressWarnings({"rawtypes", "unchecked"})
-        final Event event = new Event(stream, eventId, createdAt, type, payload);
-        //noinspection unchecked
-        eventHandler.handleEvent(event);
+        @SuppressWarnings("unchecked")
+        final EventHandler<Object> rawHandler = (EventHandler<Object>) eventHandler;
+        final Event<Object> event = new Event<>(stream, eventId, createdAt, type, payload);
+        rawHandler.handleEvent(event);
 
         log.info("Processed event {}", event);
     }

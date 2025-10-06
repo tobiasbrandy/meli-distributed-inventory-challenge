@@ -22,6 +22,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Central inventory service implementation.
+ * <p>
+ * Responsibilities:
+ * <ul>
+ * <li>CRUD operations on local store inventory</li>
+ * <li>Signal central store of purchases</li>
+ * <li>Emission of domain events via {@link EventPublisher}</li>
+ * </ul>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,7 +44,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public InventoryItem getInventoryItem(final String productId) throws ProductNotFoundException {
         return inventoryRepository.findByStoreIdAndProductId(appConfig.storeId(), productId)
-            .orElseThrow(() -> new ProductNotFoundException(appConfig.storeId(), productId));
+                .orElseThrow(() -> new ProductNotFoundException(appConfig.storeId(), productId));
     }
 
     @Override

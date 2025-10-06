@@ -18,6 +18,20 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST API for store-local inventory operations and connectivity toggles.
+ * <p>
+ * Endpoints:
+ * <ul>
+ * <li>GET / — health check for the store server</li>
+ * <li>POST /connected or /disconnected — simulate a store connectivity problem</li>
+ * <li>GET /inventory — paginated list</li>
+ * <li>GET /inventory/{productId} — fetch item for this store</li>
+ * <li>POST /inventory — create item (quantity=0)</li>
+ * <li>PUT /inventory/{productId} — set quantity</li>
+ * <li>POST /purchase/{productId} — process a local purchase</li>
+ * </ul>
+ */
 @Slf4j
 @RestController
 @Validated
