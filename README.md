@@ -73,7 +73,7 @@ The project is a multi-module Spring application with two main modules, one for 
 ### System Diagram
 
 <div align="center">
-  <img src="readme-utils/diagram.svg" alt="Architecture diagram" />
+  <img src="readme-utils/diagram.png" alt="Architecture diagram" />
   <br/>
   <sub>Simplified view with 1 Central, Redis Streams, and 2 Stores. Lines show actual stream names and event types.</sub>
 </div>
