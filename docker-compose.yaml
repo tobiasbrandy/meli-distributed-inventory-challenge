@@ -1,0 +1,58 @@
+services:
+  redis:
+    image: redis:8.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  central:
+    image: eclipse-temurin:21-jdk
+    container_name: central
+    depends_on:
+      - redis
+    volumes:
+      - ./central-server/target/central-server-0.1.0-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: >
+      java -jar app.jar
+      --server.port=8081
+      --spring.data.redis.host=redis
+      --app.stores=store-1,store-2
+    ports:
+      - "8081:8081"
+    restart: always
+
+  store1:
+    image: eclipse-temurin:21-jdk
+    container_name: store1
+    depends_on:
+      - redis
+    volumes:
+      - ./store-server/target/store-server-0.1.0-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: >
+      java -jar app.jar
+      --server.port=8082
+      --spring.data.redis.host=redis
+      --app.storeId=store-1
+    ports:
+      - "8082:8082"
+    restart: always
+
+  store2:
+    image: eclipse-temurin:21-jdk
+    container_name: store2
+    depends_on:
+      - redis
+    volumes:
+      - ./store-server/target/store-server-0.1.0-SNAPSHOT.jar:/app/app.jar
+    working_dir: /app
+    command: >
+      java -jar app.jar
+      --server.port=8083
+      --spring.data.redis.host=redis
+      --app.storeId=store-2
+    ports:
+      - "8083:8083"
+    restart: always

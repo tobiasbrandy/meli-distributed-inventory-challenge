@@ -1,0 +1,13 @@
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# Available streams
+streams:
+  storeToCentral: "store:{storeId}:to:central:stream"
+  centralToStore: "central:to:store:{storeId}:stream"
+  centralBroadcast: "central:broadcast:stream"
+  storeToStore: "store:{fromStoreId}:to:store:{toStoreId}:stream"
+  storeBroadcast: "store:{storeId}:broadcast:stream"
