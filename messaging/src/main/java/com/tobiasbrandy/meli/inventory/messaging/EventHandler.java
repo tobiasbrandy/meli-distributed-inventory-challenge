@@ -18,8 +18,7 @@ public interface EventHandler<T> {
     /**
      * Creates an {@link EventHandler} from a full event consumer.
      */
-    static <T> EventHandler<T> of(final EventType eventType, final Class<T> payloadType,
-            final Consumer<Event<T>> handler) {
+    static <T> EventHandler<T> of(final EventType eventType, final Class<T> payloadType, final Consumer<Event<T>> handler) {
         return new EventHandler<>() {
             @Override
             public EventType eventType() {
@@ -41,8 +40,7 @@ public interface EventHandler<T> {
     /**
      * Creates an {@link EventHandler} from a payload-only consumer.
      */
-    static <T> EventHandler<T> ofPayload(final EventType eventType, final Class<T> payloadType,
-            final Consumer<T> handler) {
+    static <T> EventHandler<T> ofPayload(final EventType eventType, final Class<T> payloadType, final Consumer<T> handler) {
         return of(eventType, payloadType, event -> handler.accept(event.payload()));
     }
 }

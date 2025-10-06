@@ -114,7 +114,7 @@ Central detects store disconnection by checking the heartbeat timestamp.
 #### Outbox Event Publishing
 
 To avoid dropping events when redis is not accessible (disconnected, or Redis is down), an outbox pattern is used.
-To publish an event, you first perist it to an `outbox_event` table, then a separate worker is responsible for publishing to Redis unpublished events present in the outbox table.
+To publish an event, you first persist it to an `outbox_event` table, then a separate worker is responsible for publishing to Redis unpublished events present in the outbox table.
 For the prototype, the publisher is implemented with a scheduled polling worker.
 
 #### Idempotency
