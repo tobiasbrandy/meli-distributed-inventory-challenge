@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <style>
+      .box { fill:#f7f7f7; stroke:#333; stroke-width:2; rx:8; ry:8; }
+      .redis { fill:#eef6ff; stroke:#1f5fbf; }
+      .label { font-family: Arial, Helvetica, sans-serif; font-size:16px; fill:#111; }
+      .small { font-size:14px; fill:#333; }
+      .stream { stroke:#555; stroke-width:2; fill:none; marker-end:url(#arrow); }
+      .stream-return { stroke:#888; stroke-dasharray:5 5; stroke-width:2; fill:none; marker-end:url(#arrow); }
+      .stream-label { font-family: Arial, Helvetica, sans-serif; font-size:13px; fill:#111; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 z" fill="#555" />
+    </marker>
+  </defs>
+
+  <!-- Boxes -->
+  <rect class="box" x="60" y="80" width="220" height="80" />
+  <text class="label" x="170" y="125" text-anchor="middle">Store 1</text>
+
+  <rect class="box" x="60" y="560" width="220" height="80" />
+  <text class="label" x="170" y="605" text-anchor="middle">Store 2</text>
+
+  <rect class="box redis" x="530" y="300" width="220" height="120" />
+  <text class="label" x="640" y="345" text-anchor="middle">Redis</text>
+  <text class="small" x="640" y="370" text-anchor="middle">Streams</text>
+
+  <rect class="box" x="980" y="300" width="240" height="120" />
+  <text class="label" x="1100" y="345" text-anchor="middle">Central</text>
+  <text class="small" x="1100" y="370" text-anchor="middle">Inventory Service</text>
+
+  <!-- Store->Redis (Store to Central) -->
+  <path class="stream" d="M280,120 C400,120 440,320 530,330" />
+  <text class="stream-label" x="330" y="145">store:store-1:to:central:stream</text>
+  <text class="stream-label" x="330" y="165">INVENTORY_ITEM_CREATED, INVENTORY_ITEM_UPDATED</text>
+
+  <path class="stream" d="M280,600 C400,600 440,420 530,390" />
+  <text class="stream-label" x="330" y="575">store:store-2:to:central:stream</text>
+  <text class="stream-label" x="330" y="555">INVENTORY_ITEM_CREATED, INVENTORY_ITEM_UPDATED</text>
+
+  <!-- Redis->Central (Store to Central) two slightly separated lines -->
+  <path class="stream" d="M750,330 C830,330 900,330 980,330" />
+  <text class="stream-label" x="800" y="315">store:store-1:to:central:stream</text>
+  <path class="stream" d="M750,390 C830,390 900,390 980,390" />
+  <text class="stream-label" x="800" y="415">store:store-2:to:central:stream</text>
+
+  <!-- Central->Redis (Central to Store) -->
+  <path class="stream" d="M980,350 C900,350 830,350 750,350" />
+  <text class="stream-label" x="820" y="335">central:to:store:store-1:stream</text>
+  <text class="stream-label" x="820" y="355">INVENTORY_ITEM_REMOTE_PURCHASE</text>
+
+  <path class="stream" d="M980,410 C900,410 830,410 750,410" />
+  <text class="stream-label" x="820" y="435">central:to:store:store-2:stream</text>
+  <text class="stream-label" x="820" y="455">INVENTORY_ITEM_REMOTE_PURCHASE</text>
+
+  <!-- Redis->Store (Central to Store) -->
+  <path class="stream" d="M530,350 C440,350 400,120 280,120" />
+  <text class="stream-label" x="350" y="330">central:to:store:store-1:stream</text>
+
+  <path class="stream" d="M530,410 C440,410 400,600 280,600" />
+  <text class="stream-label" x="350" y="430">central:to:store:store-2:stream</text>
+
+  <!-- Legend -->
+  <rect class="box" x="60" y="20" width="430" height="46" />
+  <text class="small" x="75" y="48">Arrows indicate stream direction. Labels show stream key and event types.</text>
+</svg>
+
