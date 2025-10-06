@@ -1,0 +1,249 @@
+@central = http://localhost:8081
+@store1 = http://localhost:8082
+@store2 = http://localhost:8083
+
+### Health check central
+GET {{central}}/
+Accept: text/plain
+
+> {% client.test("central is up", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.includes("Central Server"));
+}); %}
+
+### Health check store 1
+GET {{store1}}/
+Accept: text/plain
+
+> {% client.test("store1 is up", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.includes("Store Server"));
+}); %}
+
+### Health check store 2
+GET {{store2}}/
+Accept: text/plain
+
+> {% client.test("store2 is up", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.includes("Store Server"));
+}); %}
+
+### Store1 connected
+POST {{store1}}/connected
+
+> {% client.test("store1 connected", function() {
+        client.assert(response.status === 200);
+    }); %}
+
+### Store2 connected
+POST {{store2}}/connected
+
+> {% client.test("store2 connected", function() {
+        client.assert(response.status === 200);
+    }); %}
+
+### Create product on store1
+POST {{store1}}/inventory
+Content-Type: application/json
+
+{
+  "productId": "{{$uuid}}"
+}
+
+> {% client.test("created product on store1", function() {
+  client.assert(response.status === 201);
+  client.global.set("productId", response.body.productId);
+}); %}
+
+### Set initial quantity on store1
+PUT {{store1}}/inventory/{{productId}}
+Content-Type: application/json
+
+{
+  "quantity": 10
+}
+
+> {% client.test("quantity set on store1", function() {
+  client.assert(response.status === 204);
+}); %}
+
+### Store1 shows quantity = 10
+GET {{store1}}/inventory/{{productId}}
+Accept: application/json
+
+> {% client.test("store1 has 10", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 10);
+}); %}
+
+### Central lists inventory (should contain the created item after stream processing)
+GET {{central}}/inventory
+Accept: application/json
+
+> {% client.test("central inventory lists items", function() {
+  client.assert(response.status === 200);
+}); %}
+
+### Central fetches specific item
+GET {{central}}/inventory/store-1/{{productId}}
+Accept: application/json
+
+> {% client.test("central can fetch item", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.storeId === 'store-1');
+  client.assert(response.body.productId === client.global.get("productId"));
+  client.assert(response.body.quantity === 10);
+}); %}
+
+### Purchase via central (happy path)
+POST {{central}}/purchase/store-1/{{productId}}
+Content-Type: application/json
+
+{
+  "quantity": 2
+}
+
+> {% client.test("central purchase ok", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 8);
+}); %}
+
+### Quantities after central purchase: both sides should be 8
+GET {{store1}}/inventory/{{productId}}
+Accept: application/json
+
+> {% client.test("store1 is 8 after central purchase", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 8);
+}); %}
+
+### central is 8 after central purchase
+GET {{central}}/inventory/store-1/{{productId}}
+Accept: application/json
+
+> {% client.test("central is 8 after central purchase", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 8);
+}); %}
+
+### Insufficient stock via central
+POST {{central}}/purchase/store-1/{{productId}}
+Content-Type: application/json
+
+{
+  "quantity": 1000
+}
+
+> {% client.test("insufficient stock error", function() {
+  client.assert(response.status === 400);
+  client.assert(response.body.title === 'Insufficient Stock');
+}); %}
+
+### Simulate store1 disconnected
+POST {{store1}}/disconnected
+
+> {% client.test("store1 disconnected", function() {
+  client.assert(response.status === 200);
+}); %}
+
+### While disconnected: local purchase still succeeds, causing divergence
+POST {{store1}}/purchase/{{productId}}
+Content-Type: application/json
+
+{
+  "quantity": 2
+}
+
+> {% client.test("store-local purchase during disconnect ok", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 6);
+}); %}
+
+### store1 now 6 (disconnected)
+GET {{store1}}/inventory/{{productId}}
+Accept: application/json
+
+> {% client.test("store1 now 6 (disconnected)", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 6);
+}); %}
+
+### central still 8 (divergence)
+GET {{central}}/inventory/store-1/{{productId}}
+Accept: application/json
+
+> {% client.test("central still 8 (divergence)", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 8);
+}); %}
+
+### Central purchase should fail with store unavailable
+POST {{central}}/purchase/store-1/{{productId}}
+Content-Type: application/json
+
+{
+  "quantity": 1
+}
+
+> {% client.test("store unavailable error", function() {
+  client.assert(response.status === 500);
+  client.assert(response.body.title === 'Store Unavailable');
+}); %}
+
+### Reconnect store1
+POST {{store1}}/connected
+
+> {% client.test("store1 reconnected", function() {
+  client.assert(response.status === 200);
+}); %}
+
+### After reconnect: central catches up to store (reconvergence)
+GET {{central}}/inventory/store-1/{{productId}}
+Accept: application/json
+
+> {% client.test("central caught up to 6", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 6);
+}); %}
+
+### store1 remains 6
+GET {{store1}}/inventory/{{productId}}
+Accept: application/json
+
+> {% client.test("store1 remains 6", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 6);
+}); %}
+
+### Purchase via central again (should succeed)
+POST {{central}}/purchase/store-1/{{productId}}
+Content-Type: application/json
+
+{
+  "quantity": 3
+}
+
+> {% client.test("central purchase after reconnect ok", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 3);
+}); %}
+
+### Final verification: both sides are 3
+GET {{central}}/inventory/store-1/{{productId}}
+Accept: application/json
+
+> {% client.test("central final 3", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 3);
+}); %}
+
+
+### store1 final 3
+GET {{store1}}/inventory/{{productId}}
+Accept: application/json
+
+> {% client.test("store1 final 3", function() {
+  client.assert(response.status === 200);
+  client.assert(response.body.quantity === 3);
+}); %}

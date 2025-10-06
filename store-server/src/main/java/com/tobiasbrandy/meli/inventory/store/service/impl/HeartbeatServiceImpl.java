@@ -37,5 +37,11 @@ public class HeartbeatServiceImpl implements HeartbeatService {
 
     public void setDisconnected(final boolean disconnected) {
         this.disconnected.set(disconnected);
+        if (disconnected) {
+            val key = "store:" + appConfig.storeId() + ":heartbeat";
+            redis.opsForValue().getAndDelete(key);
+        } else {
+            emitHeartbeat();
+        }
     }
 }

@@ -27,9 +27,12 @@ class HeartbeatServiceImplTest {
     void scheduledHeartbeat_skipsWhenDisconnected() {
         var appConfig = new AppConfig("store-1");
         var redis = mock(StringRedisTemplate.class);
+        var valueOps = mock(ValueOperations.class);
+        when(redis.opsForValue()).thenReturn(valueOps);
         var svc = new HeartbeatServiceImpl(appConfig, redis);
         svc.setDisconnected(true);
+        verify(valueOps).getAndDelete("store:store-1:heartbeat");
         svc.scheduledHeartbeat();
-        verify(redis, never()).opsForValue();
+        verify(valueOps, never()).set(anyString(), anyString());
     }
 }
