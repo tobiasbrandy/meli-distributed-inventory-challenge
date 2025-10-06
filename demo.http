@@ -110,19 +110,19 @@ Content-Type: application/json
 }); %}
 
 ### Quantities after central purchase: both sides should be 8
-GET {{store1}}/inventory/{{productId}}
-Accept: application/json
-
-> {% client.test("store1 is 8 after central purchase", function() {
-  client.assert(response.status === 200);
-  client.assert(response.body.quantity === 8);
-}); %}
-
-### central is 8 after central purchase
 GET {{central}}/inventory/store-1/{{productId}}
 Accept: application/json
 
 > {% client.test("central is 8 after central purchase", function() {
+        client.assert(response.status === 200);
+        client.assert(response.body.quantity === 8);
+    }); %}
+
+### store is 8 after central purchase
+GET {{store1}}/inventory/{{productId}}
+Accept: application/json
+
+> {% client.test("store1 is 8 after central purchase", function() {
   client.assert(response.status === 200);
   client.assert(response.body.quantity === 8);
 }); %}
