@@ -8,7 +8,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +26,9 @@ import java.util.List;
  * <li>POST /purchase/{storeId}/{productId} — process a remote purchase</li>
  * </ul>
  */
+@Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 public class InventoryController {
     public static final int MAX_PAGE_SIZE = 1000;
@@ -47,8 +51,8 @@ public class InventoryController {
 
     @GetMapping("/inventory")
     public List<InventoryItem> listInventoryItem(
-        @RequestParam(required = false) final Integer page,
-        @RequestParam(required = false) @Min(1) @Max(MAX_PAGE_SIZE) final Integer size
+        @RequestParam(required = false) @Min(0) final Integer page,
+        @RequestParam(required = false) @Min(0) @Max(MAX_PAGE_SIZE) final Integer size
     ) {
         return inventoryService.listInventoryItems(
             page == null ? 0 : page,

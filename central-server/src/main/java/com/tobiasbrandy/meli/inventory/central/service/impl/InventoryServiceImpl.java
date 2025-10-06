@@ -90,6 +90,11 @@ public class InventoryServiceImpl implements InventoryService {
             new InventoryItemRemotePurchaseEvent(storeId, productId, quantity)
         );
 
+        log.info(
+            "Processed remote purchase: storeId={}, productId={}, quantityDelta={}, resultingQuantity={}",
+            storeId, productId, quantity, savedItem.getQuantity()
+        );
+
         return savedItem;
     }
 

@@ -4,7 +4,7 @@ import com.tobiasbrandy.meli.inventory.exceptions.*;
 import lombok.val;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -42,13 +42,11 @@ public final class GlobalExceptionHandler {
         return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Store Unavailable", e);
     }
 
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ProblemDetail methodNotSupported(final HttpRequestMethodNotSupportedException e) {
-        return e.getBody();
-    }
-
     @ExceptionHandler(Exception.class)
-    public ProblemDetail internalServerError(final Exception e) {
+    public ProblemDetail fallbackHandler(final Exception e) {
+        if (e instanceof ErrorResponse) {
+            return ((ErrorResponse) e).getBody();
+        }
         return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", e);
     }
 }

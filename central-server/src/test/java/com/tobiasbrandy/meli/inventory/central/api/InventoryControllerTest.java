@@ -13,11 +13,12 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class InventoryControllerTest {
 
@@ -31,8 +32,8 @@ class InventoryControllerTest {
         inventoryService = mock(InventoryService.class);
         var controller = new InventoryController(new AppConfig(List.of("store-1")), inventoryService);
         mvc = MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
+            .setControllerAdvice(new GlobalExceptionHandler())
+            .build();
     }
 
     @Test
@@ -43,8 +44,7 @@ class InventoryControllerTest {
     @Test
     void listInventory_defaults() throws Exception {
         when(inventoryService.listInventoryItems(0, 20)).thenReturn(List.of());
-        mvc.perform(get("/inventory"))
-                .andExpect(status().isOk());
+        mvc.perform(get("/inventory")).andExpect(status().isOk());
     }
 
     @Test
@@ -58,10 +58,8 @@ class InventoryControllerTest {
 
     @Test
     void getInventoryItem_invalidStore() throws Exception {
-        doThrow(new InvalidStoreIdException("bad-store")).when(inventoryService).getInventoryItem(anyString(),
-                anyString());
-        mvc.perform(get("/inventory/bad-store/p1"))
-                .andExpect(status().isBadRequest());
+        doThrow(new InvalidStoreIdException("bad-store")).when(inventoryService).getInventoryItem(anyString(), anyString());
+        mvc.perform(get("/inventory/bad-store/p1")).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -72,5 +70,17 @@ class InventoryControllerTest {
         mvc.perform(post("/purchase/store-1/p1").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.productId", is("p1")));
+    }
+
+    @Test
+    void purchase_invalidQuantity() throws Exception {
+        var body = mapper.writeValueAsString(new InventoryController.PurchaseBody(0));
+        mvc.perform(post("/purchase/store-1/p1").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void methodNotAllowed_returnsProblem() throws Exception {
+        mvc.perform(put("/inventory")).andExpect(status().isMethodNotAllowed());
     }
 }

@@ -99,6 +99,11 @@ public class InventoryServiceImpl implements InventoryService {
             new InventoryItemUpdateEvent(storeId, productId, savedItem.getQuantity())
         );
 
+        log.info(
+            "Processed local purchase: storeId={}, productId={}, quantityDelta={}, resultingQuantity={}",
+            storeId, productId, quantity, savedItem.getQuantity()
+        );
+
         return savedItem;
     }
 

@@ -32,7 +32,7 @@ Log fields should include: `storeId`, `productId`, `eventId`, `eventType`, and w
 
 Verification:
 
-- Unit tests assert logger invocations via appender spy (optional) or by behavior signals. Keep primary tests focused on behavior; spot-check logging in 1-2 key paths.
+- Tests focus on main behavior only; do not assert on logs. Logging is for operators, not CI gates.
 
 ### Error Handling Policy
 
@@ -45,30 +45,13 @@ Verification:
 - WebMvc tests already cover mapping of common exceptions; add cases: method not supported returns framework `ProblemDetail` body.
 - Messaging tests assert invalid cases throw `IllegalArgumentException` and no handler invocation.
 
-### Metrics Plan (to implement if time allows)
+### Metrics Plan
 
-- Counters:
-  - `events_published_total{type,stream}`
-  - `events_processed_total{type,stream}`
-  - `event_processing_errors_total{error}`
-  - `purchases_total{scope=central|store, outcome=success|insufficient|not_found}`
-  - `heartbeats_emitted_total{storeId}`
-- Gauges:
-  - `inventory_quantity{storeId,productId}` (sampled when updated)
-  - `outbox_unpublished_count`
-- Timers:
-  - `event_publish_duration`
-  - `event_handle_duration{type}`
-  - `purchase_duration{scope}`
+See `.memory/metrics_plan.md` for detailed metrics and rationale. We are not implementing metrics now.
 
-Verification:
+### Tracing Plan
 
-- Add Micrometer (Prometheus registry) and assert counters/timers increment via `SimpleMeterRegistry` in unit tests for critical paths (publish, handle, purchase). If not implemented now, document as backlog.
-
-### Tracing Plan (optional)
-
-- Add Spring Observability / OpenTelemetry auto-config to capture HTTP spans and custom spans for `publish()` and `onMessage()`.
-- Propagate trace context via Redis stream fields `traceId` (optional future enhancement).
+- Enable Spring Observability / OpenTelemetry auto-config to capture HTTP spans. For messaging, optional future: add custom spans for `publish()` and `onMessage()` and propagate trace context via Redis fields (e.g., `traceId`).
 
 ### Failure Injection Tests
 

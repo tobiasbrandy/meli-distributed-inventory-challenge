@@ -66,8 +66,8 @@ public class InventoryController {
 
     @GetMapping("/inventory")
     public List<InventoryItem> listInventoryItem(
-        @RequestParam(required = false) final Integer page,
-        @RequestParam(required = false) @Min(1) @Max(MAX_PAGE_SIZE) final Integer size
+        @RequestParam(required = false) @Min(0) final Integer page,
+        @RequestParam(required = false) @Min(0) @Max(MAX_PAGE_SIZE) final Integer size
     ) {
         return inventoryService.listInventoryItems(
             page == null ? 0 : page,

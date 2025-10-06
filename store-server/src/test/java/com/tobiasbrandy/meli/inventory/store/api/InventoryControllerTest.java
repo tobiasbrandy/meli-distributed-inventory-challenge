@@ -35,8 +35,7 @@ class InventoryControllerTest {
         inventoryService = mock(InventoryService.class);
         heartbeatService = mock(HeartbeatService.class);
         eventPublisher = mock(EventPublisher.class);
-        var controller = new InventoryController(new AppConfig("store-1"), inventoryService, heartbeatService,
-                eventPublisher);
+        var controller = new InventoryController(new AppConfig("store-1"), inventoryService, heartbeatService, eventPublisher);
         mvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
@@ -81,12 +80,31 @@ class InventoryControllerTest {
     }
 
     @Test
+    void setInventoryItemQuantity_invalidQuantity() throws Exception {
+        var body = mapper.writeValueAsString(new InventoryController.SetInventoryItemQuantityBody(0));
+        mvc.perform(put("/inventory/p1").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void purchase_validatesAndReturnsItem() throws Exception {
         when(inventoryService.processPurchase(eq("p1"), anyInt())).thenReturn(new InventoryItem("store-1", "p1", 5));
         var body = mapper.writeValueAsString(new InventoryController.PurchaseBody(1));
         mvc.perform(post("/purchase/p1").contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.productId", is("p1")));
+    }
+
+    @Test
+    void purchase_invalidQuantity() throws Exception {
+        var body = mapper.writeValueAsString(new InventoryController.PurchaseBody(0));
+        mvc.perform(post("/purchase/p1").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void methodNotAllowed_returns405() throws Exception {
+        mvc.perform(put("/inventory")).andExpect(status().isMethodNotAllowed());
     }
 
     @Test
